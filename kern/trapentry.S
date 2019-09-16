@@ -44,12 +44,62 @@
 .text
 
 /*
+
+Description                       Interrupt     Error Code
+Number
+
+Divide error                       0            No
+Debug exceptions                   1            No
+Breakpoint                         3            No
+Overflow                           4            No
+Bounds check                       5            No
+Invalid opcode                     6            No
+Coprocessor not available          7            No
+System error                       8            Yes (always 0)
+Coprocessor Segment Overrun        9            No
+Invalid TSS                       10            Yes
+Segment not present               11            Yes
+Stack exception                   12            Yes
+General protection fault          13            Yes
+Page fault                        14            Yes
+Coprocessor error                 16            No
+Two-byte SW interrupt             0-255         No
+
+*/
+
+/*
  * Lab 3: Your code here for generating entry points for the different traps.
  */
-
-
+TRAPHANDLER_NOEC(t_divide, T_DIVIDE)
+TRAPHANDLER_NOEC(t_debug, T_DEBUG)
+TRAPHANDLER_NOEC(t_nmi, T_NMI)
+TRAPHANDLER_NOEC(t_brkpt, T_BRKPT)
+TRAPHANDLER_NOEC(t_oflow, T_OFLOW)
+TRAPHANDLER_NOEC(t_bound, T_BOUND)
+TRAPHANDLER_NOEC(t_illop, T_ILLOP)
+TRAPHANDLER_NOEC(t_device, T_DEVICE)
+TRAPHANDLER(t_dblflt, T_DBLFLT)
+TRAPHANDLER(t_tss, T_TSS)
+TRAPHANDLER(t_segnp, T_SEGNP)
+TRAPHANDLER(t_stack, T_STACK)
+TRAPHANDLER(t_gpflt, T_GPFLT)
+TRAPHANDLER(t_pgflt, T_PGFLT)
+TRAPHANDLER_NOEC(t_fperr, T_FPERR)
+TRAPHANDLER_NOEC(t_align, T_ALIGN)
+TRAPHANDLER_NOEC(t_mchk, T_MCHK)
+TRAPHANDLER_NOEC(t_simderr, T_SIMDERR)
+TRAPHANDLER_NOEC(t_syscall, T_SYSCALL)
+TRAPHANDLER_NOEC(t_default, T_DEFAULT)
 
 /*
  * Lab 3: Your code here for _alltraps
  */
-
+_alltraps:
+    pushl %ds
+    pushl %es
+    pushal
+    movw $GD_KD, %ax
+    movw %ax, %ds
+    movw %ax, %es
+    pushl %esp
+    call trap

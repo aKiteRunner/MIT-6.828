@@ -120,15 +120,13 @@ env_init(void)
 	// Set up envs array
 	// LAB 3: Your code here.
 	size_t i;
-	for (i = NENV - 1; i > 0; i--) {
+	env_free_list = &envs[0];
+	envs[0].env_id = 0;
+	for (i = 1; i < NENV; i++) {
 	    // keep order
 	    envs[i].env_id = 0;
-	    envs[i].env_link = env_free_list;
-	    env_free_list = &envs[i];
+	    envs[i - 1].env_link = &envs[i];
 	}
-	envs[0].env_id = 0;
-	envs[0].env_link = env_free_list;
-	env_free_list = &envs[0];
 	// Per-CPU part of the initialization
 	env_init_percpu();
 }
@@ -258,7 +256,7 @@ env_alloc(struct Env **newenv_store, envid_t parent_id)
 
 	// Enable interrupts while in user mode.
 	// LAB 4: Your code here.
-
+	e->env_tf.tf_eflags |= FL_IF;
 	// Clear the page fault handler until user installs one.
 	e->env_pgfault_upcall = 0;
 
@@ -539,6 +537,7 @@ env_run(struct Env *e)
 	curenv->env_status = ENV_RUNNING;
 	curenv->env_runs++;
 	lcr3(PADDR(e->env_pgdir));
+	unlock_kernel();
 	env_pop_tf(&(e->env_tf));
 }
 

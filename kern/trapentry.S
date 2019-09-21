@@ -66,6 +66,16 @@ Page fault                        14            Yes
 Coprocessor error                 16            No
 Two-byte SW interrupt             0-255         No
 
+#define IRQ_OFFSET	32	// IRQ 0 corresponds to int IRQ_OFFSET
+
+// Hardware IRQ numbers. We receive these as (IRQ_OFFSET+IRQ_WHATEVER)
+#define IRQ_TIMER        0
+#define IRQ_KBD          1
+#define IRQ_SERIAL       4
+#define IRQ_SPURIOUS     7
+#define IRQ_IDE         14
+#define IRQ_ERROR       19
+
 */
 
 /*
@@ -92,6 +102,12 @@ TRAPHANDLER_NOEC(t_simderr, T_SIMDERR)
 TRAPHANDLER_NOEC(t_syscall, T_SYSCALL)
 TRAPHANDLER_NOEC(t_default, T_DEFAULT)
 
+TRAPHANDLER_NOEC(irq_timer, IRQ_OFFSET + IRQ_TIMER);
+TRAPHANDLER_NOEC(irq_kbd, IRQ_OFFSET + IRQ_KBD);
+TRAPHANDLER_NOEC(irq_serial, IRQ_OFFSET + IRQ_SERIAL);
+TRAPHANDLER_NOEC(irq_spurious, IRQ_OFFSET + IRQ_SPURIOUS);
+TRAPHANDLER_NOEC(irq_ide, IRQ_OFFSET + IRQ_IDE);
+TRAPHANDLER_NOEC(irq_error, IRQ_OFFSET + IRQ_ERROR);
 /*
  * Lab 3: Your code here for _alltraps
  */

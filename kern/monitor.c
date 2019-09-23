@@ -11,6 +11,8 @@
 #include <kern/monitor.h>
 #include <kern/kdebug.h>
 #include <kern/trap.h>
+#include "kdebug.h"
+
 
 #define CMDBUF_SIZE	80	// enough for one VGA text line
 
@@ -25,6 +27,7 @@ struct Command {
 static struct Command commands[] = {
 	{ "help", "Display this list of commands", mon_help },
 	{ "kerninfo", "Display information about the kernel", mon_kerninfo },
+    { "backtrace", "Display information about the stack", mon_backtrace},
 };
 
 /***** Implementations of basic kernel monitor commands *****/
@@ -59,6 +62,20 @@ int
 mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 {
 	// Your code here.
+	uint32_t *ebp = (uint32_t*)read_ebp(), *esp = (uint32_t*)read_esp(), eip, *last_ebp;
+	struct Eipdebuginfo info;
+	while (ebp) {
+        eip = *(ebp + 1);
+        last_ebp = (uint32_t*)*ebp;
+        cprintf("ebp %x eip %x args", ebp, eip);
+        int i;
+        for (i = 2; i < 7; i++, esp++) {
+            cprintf(" %08x", *(ebp + i));
+        }
+        debuginfo_eip(eip, &info);
+        cprintf("\n%s:%d: %.*s+%x\n", info.eip_file, info.eip_line, info.eip_fn_namelen, info.eip_fn_name, eip - info.eip_fn_addr);
+        ebp = last_ebp;
+	}
 	return 0;
 }
 

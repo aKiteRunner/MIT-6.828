@@ -67,7 +67,7 @@ duppage(envid_t envid, unsigned pn)
 	// read only
 	//cprintf("%x ", pn);
 	pte_t pte = uvpt[pn];
-	if (!(pte & PTE_W) && !(pte & PTE_COW)) {
+	if ((!(pte & PTE_W) && !(pte & PTE_COW)) || (pte & PTE_SHARE)) {
 		if ((r = sys_page_map(thisenv->env_id, (void*)(pn * PGSIZE), envid, (void*)(pn * PGSIZE), pte & PTE_SYSCALL)) < 0)
 			panic("sys_page_map %e", r);
 		return 0;

@@ -302,6 +302,22 @@ static int
 copy_shared_pages(envid_t child)
 {
 	// LAB 5: Your code here.
+	int is_below_ulim = 1, i, j;
+	for (i = 0; is_below_ulim && i < NPDENTRIES; i++) {
+		if (uvpd[i] & PTE_P) {
+			for (j = 0; is_below_ulim && j < NPTENTRIES; j++) {
+				uint32_t pn = i * NPTENTRIES + j;
+				if (pn == ((UXSTACKTOP - PGSIZE) >> PGSHIFT))
+					continue;
+				else if (pn >= (UTOP >> PGSHIFT))
+					is_below_ulim = 0;
+				else if (uvpt[pn] & PTE_SHARE) {
+					if (sys_page_map(0, (void*)(pn * PGSIZE), child, (void*)(pn * PGSIZE), uvpt[pn] & PTE_SYSCALL) < 0)
+						panic("sys_page_map error");
+				}
+			}
+		}
+	}
 	return 0;
 }
 
